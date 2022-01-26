@@ -12,3 +12,13 @@ pub mod solana_twitter {
 
 #[derive(Accounts)]
 pub struct Initialize {}
+
+#[account]
+pub struct Tweet {
+    pub author: Pubkey,
+    pub timestamp: i64,
+    pub topic: String,
+    pub content: String,
+}
+
+const DISCRIMINATOR_LENGTH: usize = 8;
