@@ -8,22 +8,28 @@ describe('solana-twitter', () => {
   anchor.setProvider(anchor.Provider.env());
   const program = anchor.workspace.SolanaTwitter as Program<SolanaTwitter>;
 
-  it('can send a new tweet without a topic', async () => {
+  it('can send a new tweet from a different author', async () => {
+    // Generate another user and airdrop them some SOL.
+    const otherUser = anchor.web3.Keypair.generate();
+
+    // Call the "SendTweet" instruction on behalf of this other user.
     const tweet = anchor.web3.Keypair.generate();
-    await program.rpc.sendTweet('', 'gm', {
+    await program.rpc.sendTweet('veganism', 'Yay Tofu!', {
         accounts: {
             tweet: tweet.publicKey,
-            author: program.provider.wallet.publicKey,
+            author: otherUser.publicKey,
             systemProgram: anchor.web3.SystemProgram.programId,
         },
-        signers: [tweet],
+        signers: [otherUser, tweet],
     });
 
+    // Fetch the account details of the created tweet.
     const tweetAccount = await program.account.tweet.fetch(tweet.publicKey);
 
-    assert.equal(tweetAccount.author.toBase58(), program.provider.wallet.publicKey.toBase58());
-    assert.equal(tweetAccount.topic, '');
-    assert.equal(tweetAccount.content, 'gm');
+    // Ensure it has the right data.
+    assert.equal(tweetAccount.author.toBase58(), otherUser.publicKey.toBase58());
+    assert.equal(tweetAccount.topic, 'veganism');
+    assert.equal(tweetAccount.content, 'Yay Tofu!');
     assert.ok(tweetAccount.timestamp);
   });
 });
