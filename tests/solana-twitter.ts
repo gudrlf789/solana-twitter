@@ -9,10 +9,10 @@ describe('solana-twitter', () => {
   const program = anchor.workspace.SolanaTwitter as Program<SolanaTwitter>;
 
   it('can send a new tweet from a different author', async () => {
-    // Generate another user and airdrop them some SOL.
     const otherUser = anchor.web3.Keypair.generate();
+    const signature = await program.provider.connection.requestAirdrop(otherUser.publicKey, 1000000000);
+    await program.provider.connection.confirmTransaction(signature);
 
-    // Call the "SendTweet" instruction on behalf of this other user.
     const tweet = anchor.web3.Keypair.generate();
     await program.rpc.sendTweet('veganism', 'Yay Tofu!', {
         accounts: {
@@ -23,10 +23,8 @@ describe('solana-twitter', () => {
         signers: [otherUser, tweet],
     });
 
-    // Fetch the account details of the created tweet.
     const tweetAccount = await program.account.tweet.fetch(tweet.publicKey);
 
-    // Ensure it has the right data.
     assert.equal(tweetAccount.author.toBase58(), otherUser.publicKey.toBase58());
     assert.equal(tweetAccount.topic, 'veganism');
     assert.equal(tweetAccount.content, 'Yay Tofu!');
