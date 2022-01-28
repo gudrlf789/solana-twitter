@@ -42,7 +42,7 @@ pub struct SendTweet<'info> {
     pub tweet: Account<'info, Tweet>,
     #[account(mut)]
     pub author: Signer<'info>,
-    #[accout(address = system_program::ID)]
+    #[account(address = system_program::ID)]
     pub system_program: AccountInfo<'info>,
 }
 
