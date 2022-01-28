@@ -1,6 +1,7 @@
 import * as anchor from '@project-serum/anchor';
 import { Program } from '@project-serum/anchor';
 import { SolanaTwitter } from '../target/types/solana_twitter';
+import * as assert from "assert";
 
 describe('solana-twitter', () => {
 
@@ -21,5 +22,9 @@ describe('solana-twitter', () => {
   });
 
   const tweetAccount = await program.account.tweet.fetch(tweet.publicKey);
-  console.log(tweetAccount);
+  
+  assert.equal(tweetAccount.author.toBase58(), program.provider.wallet.publicKey.toBase58());
+  assert.equal(tweetAccount.topic, 'veganism');
+  assert.equal(tweetAccount.content, 'Hummus, am I right?');
+  assert.ok(tweetAccount.timestamp);
 });
