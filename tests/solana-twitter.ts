@@ -6,12 +6,20 @@ describe('solana-twitter', () => {
 
   // Configure the client to use the local cluster.
   anchor.setProvider(anchor.Provider.env());
-
   const program = anchor.workspace.SolanaTwitter as Program<SolanaTwitter>;
 
-  it('Is initialized!', async () => {
-    // Add your test here.
-    const tx = await program.rpc.initialize({});
-    console.log("Your transaction signature", tx);
+  it('can send a new tweet', async () => {
+    const tweet = anchor.web3.Keypair.generate();
+    await program.rpc.sendTweet('veganism', 'Hummus, am I right?', {
+      accounts: {
+        tweet: tweet.publicKey,
+        author: program.provider.wallet.publicKey,
+        systemProgram: anchor.web3.systemProgram.programId,
+      },
+      signers: [tweet],
+    });
   });
+
+  const tweetAccount = await program.account.tweet.fetch(tweet.publicKey);
+  console.log(tweetAccount);
 });
